@@ -1,0 +1,4 @@
+---
+
+local_bootstrap_path: "/opt/dcos-setup"
+bootstrap_url: "/tmp/dcos"

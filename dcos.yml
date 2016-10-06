@@ -1,0 +1,28 @@
+- hosts: all
+  remote_user: root
+  become: yes
+  become_method: sudo
+  vars_files:
+    - vars/dcos-settings.yml
+  tasks:
+    # folder path must be the same as described in bootstrap_url option in dc/os config
+    - name: create temporary directory
+      file: path={{bootstrap_url}} state=directory mode=0755
+
+    - name: send DC/OS installer to nodes
+      copy: src={{local_bootstrap_path}}/genconf/serve/ dest={{bootstrap_url}}/ mode=0755
+
+    - name: Configure masters
+      command: bash /tmp/dcos/dcos_install.sh master
+      when: "'masters' in group_names"
+
+    - name: Configure private slaves
+      command: bash /tmp/dcos/dcos_install.sh slave
+      when: "'private_agents' in group_names"
+
+    - name: Configure public slaves
+      command: bash /tmp/dcos/dcos_install.sh slave_public
+      when: "'public_agents' in group_names"
+
+    - name: Add proxy
+      copy: src=files/environment.proxy dest=/var/lib/dcos/  mode=0644
