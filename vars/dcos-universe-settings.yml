@@ -1,0 +1,4 @@
+---
+
+url_container: "https://downloads.mesosphere.com/universe/public/local-universe.tar.gz"
+master_path_container: /opt/mesosphere

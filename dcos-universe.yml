@@ -1,0 +1,20 @@
+---
+- hosts: masters
+  remote_user: root
+  become: yes
+  become_method: sudo
+  vars_files:
+    - vars/dcos-universe-settings.yml
+  tasks:
+
+    - name: Download the local-universe container
+      get_url: url={{url_container}} dest={{master_path_container}}
+
+    - name: Load container
+      command: "docker load < {{master_path_container}}/local-universe.tar.gz"
+
+    - name: Create systemd service dcos-local-universe-http.service
+      copy: src="files/dcos-local-universe-http.service" dest="/etc/systemd/system/dcos-local-universe-http.service" mode=0644
+
+    - name: Create systemd service dcos-local-universe-registry.service
+      copy: src="files/dcos-local-universe-registry.service" dest="/etc/systemd/system/dcos-local-universe-registry.service" mode=0644
