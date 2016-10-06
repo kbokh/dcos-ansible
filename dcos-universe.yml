@@ -16,5 +16,28 @@
     - name: Create systemd service dcos-local-universe-http.service
       copy: src="files/dcos-local-universe-http.service" dest="/etc/systemd/system/dcos-local-universe-http.service" mode=0644
 
+    - name: Enable and start http service
+      service: name=dcos-local-universe-http state=started enabled=yes
+
     - name: Create systemd service dcos-local-universe-registry.service
       copy: src="files/dcos-local-universe-registry.service" dest="/etc/systemd/system/dcos-local-universe-registry.service" mode=0644
+
+    - name: Enable and start registry service
+      service: name=dcos-local-universe-registry state=started enabled=yes
+
+- hosts: agents
+  remote_user: root
+  become: yes
+  become_method: sudo
+  vars_files:
+    - vars/dcos-universe-settings.yml
+  tasks:
+
+    - name: Create folder for docker certificate
+      file: file: name=/etc/docker/certs.d/master.mesos:5000 state=directory mode=0755
+
+    - name: Download certificate
+      get_url: url=http://master.mesos:8082/certs/domain.crt dest=/etc/docker/certs.d/master.mesos:5000/ca.crt
+
+    - name: Enable and start registry service
+      service: name=docker state=restarted
