@@ -2,3 +2,9 @@
 
 local_bootstrap_path: "/opt/dcos-setup"
 bootstrap_url: "/tmp/dcos"
+http_proxy: "0.0.0.0:00"
+https_proxy: {{http_proxy}}
+ftp_proxy: {{http_proxy}}
+# Comma separated list of local networks
+no_proxy:
+is_proxy: yes
