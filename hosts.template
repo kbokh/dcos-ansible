@@ -1,0 +1,43 @@
+# This is the default ansible 'hosts' file.
+#
+# It should live in /etc/ansible/hosts
+#
+#   - Comments begin with the '#' character
+#   - Blank lines are ignored
+#   - Groups of hosts are delimited by [header] elements
+#   - You can enter hostnames or ip addresses
+#   - A hostname/ip can be a member of multiple groups
+
+
+# The master node
+[masters]
+192.168.1.1 MYID=1
+192.168.1.2 MYID=2
+192.168.1.3 MYID=3
+
+[zookeeper:children]
+masters
+
+# Nodes with gpu
+[gpu_nodes]
+192.168.2.[1:10]
+
+[gpu_nodes:vars]
+gpu_devices='0,1'
+gpus=2
+
+[virtual]
+192.168.3.[1:25]
+
+# The public agents
+[public_agents]
+
+# The private agents
+[private_agents:children]
+gpus
+virtual
+
+# All agents
+[agents:children]
+private_agents
+public_agents
