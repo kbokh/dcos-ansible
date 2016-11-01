@@ -1,0 +1,7 @@
+---
+
+mesos_slave_common_path: "/var/lib/dcos/mesos-slave-common"
+default_mesos_resources: ' {"name":"ports","type":"RANGES","ranges": {"range": [{"begin": 1025, "end": 2180},{"begin": 2182, "end": 3887},{"begin": 3889, "end": 5049},{"begin": 5052, "end": 8079},{"begin": 8082, "end": 8180},{"begin": 8182, "end": 32000}]}} '
+gpu_mesos_resources: ' [{{default_mesos_resources}},{"name": "gpus","type": "SCALAR","scalar": {"value": {{gpus}}}}] '
+mesos_isolation_default: 'cgroups/cpu,cgroups/mem,disk/du,network/cni,filesystem/linux,docker/runtime,docker/volume'
+mesos_isolation_gpu: 'cgroups/devices,gpu/nvidia'

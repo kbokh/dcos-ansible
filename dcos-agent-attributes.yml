@@ -1,0 +1,25 @@
+---
+- hosts: agents
+  remote_user: root
+  become: yes
+  become_method: sudo
+  vars_files:
+    - vars/dcos-mesos-settings.yml
+  tasks:
+
+    - name: stop mesos agents
+      systemd: name="dcos-mesos-slave" state=stopped
+
+    - name: Mesos attributes for virtual
+      lineinfile: dest={{mesos_slave_common_path}} regexp="^MESOS_ATTRIBUTES" create=yes line="MESOS_ATTRIBUTES=hostname:{{ansible_hostname}};ip:{{ansible_default_ipv4.address}};rack:virtual"
+      when: "'virtual' in group_names"
+
+    - name: Mesos attributes for titanz
+      lineinfile: dest={{mesos_slave_common_path}} regexp="^MESOS_ATTRIBUTES" create=yes line="MESOS_ATTRIBUTES=hostname:{{ansible_hostname}};ip:{{ansible_default_ipv4.address}};rack:gpu;gputype:titanz"
+      when: "'titanz' in group_names"
+
+    - name: Remove agent checkpoint state
+      file: path="/var/lib/mesos/slave/meta/slaves/latest" state=absent
+
+    - name: start mesos agents
+      systemd: name="dcos-mesos-slave" state=started

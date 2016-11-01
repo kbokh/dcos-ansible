@@ -1,0 +1,33 @@
+---
+- hosts: gpu_nodes
+  remote_user: root
+  become: yes
+  become_method: sudo
+  vars_files:
+    - vars/dcos-mesos-settings.yml
+  tasks:
+
+    - name: stop mesos agents
+      systemd: name="dcos-mesos-slave" state=stopped
+
+    - name: set mesos gpu resources
+      lineinfile:
+        dest: "{{mesos_slave_common_path}}"
+        regexp: "^MESOS_RESOURCES"
+        create: yes
+        line: "MESOS_RESOURCES={{gpu_mesos_resources}}"
+
+    - name: setup gpu isolation
+      lineinfile: dest={{mesos_slave_common_path}} regexp="^MESOS_ISOLATION" create=yes line="MESOS_ISOLATION={{mesos_isolation_default}},{{mesos_isolation_gpu}}"
+
+    - name: add  gpu devices to mesos
+      lineinfile: dest={{mesos_slave_common_path}} regexp="^MESOS_NVIDIA_GPU_DEVICES" create=yes line="MESOS_NVIDIA_GPU_DEVICES={{gpu_devices}}"
+
+    - name: Remove agent checkpoint state
+      file: path="/var/lib/mesos/slave/meta/slaves/latest" state=absent
+
+    - name: Remove agent checkpoint state
+      file: path="/var/lib/dcos/mesos-resources" state=absent
+
+    - name: start mesos agents
+      systemd: name="dcos-mesos-slave" state=started
