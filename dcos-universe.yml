@@ -7,23 +7,31 @@
     - vars/dcos-universe-settings.yml
   tasks:
 
-    - name: Download the local-universe container
-      get_url: url={{url_container}} dest={{master_path_container}}
+    - name: Upload the local-universe container to masters
+      copy: src={{universe_project_path}}/{{project_container_path}}/{{universe_image_arc}} dest={{master_path_container}}
+
+    - name: Stop the registry service
+      service: name=dcos-local-universe-registry state=stopped
+      when: is_update
+
+    - name: Stop the http service
+      service: name=dcos-local-universe-http state=stopped
+      when: is_update
 
     - name: Load container
-      command: "docker load < {{master_path_container}}/local-universe.tar.gz"
+      command: docker load -i "{{master_path_container}}/{{universe_image_arc}}"
 
     - name: Create systemd service dcos-local-universe-http.service
-      copy: src="files/dcos-local-universe-http.service" dest="/etc/systemd/system/dcos-local-universe-http.service" mode=0644
-
-    - name: Enable and start http service
-      service: name=dcos-local-universe-http state=started enabled=yes
+      copy: src="{{universe_project_path}}/{{project_container_path}}/dcos-local-universe-http.service" dest="/etc/systemd/system/dcos-local-universe-http.service" mode=0644
 
     - name: Create systemd service dcos-local-universe-registry.service
-      copy: src="files/dcos-local-universe-registry.service" dest="/etc/systemd/system/dcos-local-universe-registry.service" mode=0644
+      copy: src="{{universe_project_path}}/{{project_container_path}}/dcos-local-universe-registry.service" dest="/etc/systemd/system/dcos-local-universe-registry.service" mode=0644
+
+    - name: Enable and start http service
+      systemd: name=dcos-local-universe-http state=started enabled=yes daemon_reload=yes
 
     - name: Enable and start registry service
-      service: name=dcos-local-universe-registry state=started enabled=yes
+      service: name=dcos-local-universe-registry state=started enabled=yes daemon_reload=yes
 
 - hosts: agents
   remote_user: root
@@ -34,10 +42,13 @@
   tasks:
 
     - name: Create folder for docker certificate
-      file: file: name=/etc/docker/certs.d/master.mesos:5000 state=directory mode=0755
+      file: name=/etc/docker/certs.d/master.mesos:5000 state=directory mode=0755
+      when: not is_update
 
     - name: Download certificate
       get_url: url=http://master.mesos:8082/certs/domain.crt dest=/etc/docker/certs.d/master.mesos:5000/ca.crt
+      when: not is_update
 
     - name: Enable and start registry service
       service: name=docker state=restarted
+      when: not is_update

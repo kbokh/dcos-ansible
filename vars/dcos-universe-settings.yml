@@ -1,4 +1,9 @@
 ---
 
-url_container: "https://downloads.mesosphere.com/universe/public/local-universe.tar.gz"
 master_path_container: /opt/mesosphere
+
+# Path to local universe project folder
+universe_project_path: "~/Projects/universe"
+project_container_path: "docker/local-universe"
+universe_image_arc: local-universe.tar.gz
+is_update: yes
