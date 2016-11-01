@@ -1,4 +1,4 @@
 http_proxy="http://{{http_proxy}}/"
 https_proxy="https://{{https_proxy}}/"
 ftp_proxy="ftp://{{ftp_proxy}}/"
-no_proxy="*.mesos, localhost, 127.0.0.0/8, 9.0.0.0/8, 172.16.0.0/12, 44.128.0.0/20, 198.51.100.0/24{% if no_proxy is defines %}, {{no_proxy}}{% endif %}"
+no_proxy=".mesos, localhost, 127.0.0.0/8, 9.0.0.0/8, 172.16.0.0/12, 44.128.0.0/20, 198.51.100.0/24{% if no_proxy is defines %}, {{no_proxy}}{% endif %}"
